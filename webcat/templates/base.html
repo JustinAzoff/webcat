@@ -1,9 +1,23 @@
 <html>
   <head>
     <title>{% block title %}Default title{% end %}</title>
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
   </head>
   <body>
-    {% block main %}
-    {% end %}
+    <div class="row-fluid">
+        <div class="span2">
+            {% block sidebar %}
+            <ul class="nav nav-list" id="channel_list">
+            <li class="nav-header">Channels</li>
+            </ul>
+            {% end %}
+        </div>
+        <div class="span10">
+            {% block main %}
+            {% end %}
+        </div>
+    </div>
   </body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="/static/js/app.js"></script>
 </html>

@@ -1,11 +1,13 @@
 import tornado.ioloop
 import os
 import tornado.web
+import tornado.websocket
 from tornado.escape import json_decode, json_encode
 
 from webcat.dictstore import DictStore
 
 STORE = DictStore()
+SOCKETS = set()
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -28,6 +30,19 @@ class MsgHandler(tornado.web.RequestHandler):
     def get(self, target):
         self.write({"messages": STORE.get_msgs(target)})
 
+class Live(tornado.websocket.WebSocketHandler):
+    def open(self):
+        print "WebSocket open"
+        self.write_message({"channels": STORE.get_channels()})
+        SOCKETS.add(self)
+
+    def on_message(self, message):
+        self.write_message({"msg": "You said: " + message})
+
+    def on_close(self):
+        print "WebSocket closed"
+        sockets.remove(self)
+
 def make_app():
     settings = dict(
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
@@ -39,6 +54,7 @@ def make_app():
         (r"/post", PostHandler),
         (r"/msgs/(.*)", MsgHandler),
         (r"/channels", ChannelsHandler),
+        (r"/websocket", Live),
     ], **settings)
     return application
 
