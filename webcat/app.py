@@ -25,6 +25,8 @@ class PostHandler(tornado.web.RequestHandler):
         for t in targets:
             STORE.add_msg(t, msg)
         self.write('"ok"')
+        for s in SOCKETS:
+            s.write_message(msg)
 
 class MsgHandler(tornado.web.RequestHandler):
     def get(self, target):
@@ -41,7 +43,7 @@ class Live(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         print "WebSocket closed"
-        sockets.remove(self)
+        SOCKETS.remove(self)
 
 def make_app():
     settings = dict(
