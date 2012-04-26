@@ -6,6 +6,7 @@ $(function(){
 
   // Our basic **Channel** model has `name` and `unread` attributes
   var Channel = Backbone.Model.extend({
+    urlRoot: '/channel',
 
     // Default attributes for the todo item.
     defaults: function() {
@@ -18,12 +19,15 @@ $(function(){
     // Ensure that each Channel created has `name`.
     initialize: function() {
       if (!this.get("name")) {
-        this.set({"name": this.defaults.name});
+        this.set({"name": this.defaults().name});
       }
       if (!this.get("unread")) {
-        this.set({"unread": this.defaults.unread});
+        this.set({"unread": this.defaults().unread});
       }
-      console.log("Made a new channel called " + this.get("name"));
+      this.set({"id": this.get("name")}) 
+      this.messages = new Messages()
+      this.messages.url = this.url() + "/messages";
+      console.log("messages url set to " + this.messages.url);
     },
 
   });
@@ -66,7 +70,17 @@ $(function(){
     },
 
     show_messages: function(){
-        alert("clicked?");
+        console.log("Loading messages for " + this.model.get("name"));
+        this.model.messages.bind('add', this.addOne, this);
+        this.model.messages.bind('reset', this.addAll, this);
+        this.model.messages.fetch();
+    },
+    addOne: function(message) {
+      var view = new MessageView({model: message});
+      this.$("#messages").append(view.render().el);
+    },
+    addAll: function(messages) {
+      messages.each(this.addOne);
     },
 
     // The ChannelView listens for changes to its model, re-rendering. Since there's
@@ -79,6 +93,7 @@ $(function(){
 
     // Re-render the titles of the todo item.
     render: function() {
+      console.log(this.model.toJSON());
       this.$el.html(this.template(this.model.toJSON()));
       return this;
     },
@@ -88,6 +103,47 @@ $(function(){
       this.model.clear();
     }
 
+  });
+
+  // Messages
+
+  var Message  = Backbone.Model.extend({
+    initialize: function() {
+    }
+  });
+
+  var Messages = Backbone.Collection.extend({
+    model: Message,
+  });
+
+  var MessageView = Backbone.View.extend({
+    //... is a list tag.
+    tagName:  "li",
+
+    // Cache the template function for a single item.
+    template: _.template($('#message-template').html()),
+
+    // The DOM events specific to an item.
+
+    initialize: function() {
+      this.model.bind("reset", this.render, this);
+      this.model.bind("add",   this.render, this);
+      this.model.bind('change', this.render, this);
+
+      this.model.bind('destroy', this.remove, this);
+    },
+
+    // Re-render the titles of the todo item.
+    render: function() {
+      console.log("rendering..");
+      this.$el.html(this.template(this.model.toJSON()));
+      return this;
+    },
+
+    // Remove the item, destroy the model.
+    clear: function() {
+      this.model.clear();
+    }
   });
 
   // The Application
@@ -116,6 +172,8 @@ $(function(){
         Channels.bind('add', this.addOne, this);
         Channels.bind('reset', this.addAll, this);
         Channels.fetch();
+
+        //Messages.add([{"msg": "hi", "time": "now!"}]);
     },
 
     // Re-rendering the App just means refreshing the statistics -- the rest
@@ -136,7 +194,7 @@ $(function(){
     // Add all items in the **Channels** collection at once.
     addAll: function() {
       Channels.each(this.addOne);
-    },
+    }
 
   });
 
@@ -148,8 +206,10 @@ $(function(){
         ws.send("Hello, world");
     };
     ws.onmessage = function (evt) {
+        console.log(evt.data);
         var data = JSON.parse(evt.data);
         if(data.channels){
+            Channels.reset(data.channels);
             //Channels.create({name: "test"});
         }
     };

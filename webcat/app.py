@@ -19,19 +19,22 @@ class ChannelsHandler(tornado.web.RequestHandler):
         self.write(json_encode(channels))
         #self.write({"models": channels})
 
+class ChannelMessagesHandler(tornado.web.RequestHandler):
+    def get(self, target):
+        messages = STORE.get_msgs(target)
+        self.write(json_encode(messages))
+
 class PostHandler(tornado.web.RequestHandler):
     def post(self):
         msg = self.get_argument("msg")
         targets = self.get_arguments("target")
         for t in targets:
-            STORE.add_msg(t, msg)
+            m = STORE.add_msg(t, msg)
         self.write('"ok"')
         for s in SOCKETS:
-            s.write_message(msg)
+            s.write_message(m)
+            s.write_message({"channels": STORE.get_channels()})
 
-class MsgHandler(tornado.web.RequestHandler):
-    def get(self, target):
-        self.write({"messages": STORE.get_msgs(target)})
 
 class Live(tornado.websocket.WebSocketHandler):
     def open(self):
@@ -55,7 +58,7 @@ def make_app():
         (r"/static/(.*)", tornado.web.StaticFileHandler),
         (r"/", MainHandler),
         (r"/post", PostHandler),
-        (r"/msgs/(.*)", MsgHandler),
+        (r"/channel/(.*)/messages", ChannelMessagesHandler),
         (r"/channels", ChannelsHandler),
         (r"/websocket", Live),
     ], **settings)
