@@ -16,7 +16,8 @@ class MainHandler(tornado.web.RequestHandler):
 class ChannelsHandler(tornado.web.RequestHandler):
     def get(self):
         channels = STORE.get_channels()
-        self.write({"channels": channels})
+        self.write(json_encode(channels))
+        #self.write({"models": channels})
 
 class PostHandler(tornado.web.RequestHandler):
     def post(self):

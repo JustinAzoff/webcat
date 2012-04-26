@@ -11,7 +11,7 @@ $(function(){
     defaults: function() {
       return {
         name: "unnamed?",
-        unread: 0
+        unread: "0"
       };
     },
 
@@ -20,6 +20,10 @@ $(function(){
       if (!this.get("name")) {
         this.set({"name": this.defaults.name});
       }
+      if (!this.get("unread")) {
+        this.set({"unread": this.defaults.unread});
+      }
+      console.log("Made a new channel called " + this.get("name"));
     },
 
   });
@@ -109,8 +113,9 @@ $(function(){
     // collection, when items are added or changed. Kick things off by
     // loading any preexisting todos that might be saved in *jquery*.
     initialize: function() {
-        var c = new Channel({name: "test"});
-        this.addOne(c);
+        Channels.bind('add', this.addOne, this);
+        Channels.bind('reset', this.addAll, this);
+        Channels.fetch();
     },
 
     // Re-rendering the App just means refreshing the statistics -- the rest
@@ -125,7 +130,7 @@ $(function(){
     // appending its element to the `<ul>`.
     addOne: function(channel) {
       var view = new ChannelView({model: channel});
-      this.$("#channel-list").append(view.render().el);
+      this.$("#channel_list").append(view.render().el);
     },
 
     // Add all items in the **Channels** collection at once.
