@@ -71,18 +71,21 @@ $(function(){
 
     show_messages: function(){
         console.log("Loading messages for " + this.model.get("name"));
-        $("#messages").html("");
+        $("#messages-" + this.model.get("name")).html("");
         this.addAll(this.model.messages);
         this.model.set("unread", 0);
+        $(".messages").hide()
+        this.options.mview.$el.show();
     },
-    addOne: function(message) {
+    addOne: function(message, that) {
       //console.log("Added..");
       //console.log(message);
       var view = new MessageView({model: message});
-      $("#messages").append(view.render().el);
+      this.options.mview.$el.append(view.render().el);
+      //$("#messages-" + this.model.get("name")).append(view.render().el);
     },
     addAll: function(messages) {
-      messages.each(this.addOne);
+      messages.each(this.addOne, this);
     },
 
     // The ChannelView listens for changes to its model, re-rendering. Since there's
@@ -107,6 +110,16 @@ $(function(){
       this.model.clear();
     }
 
+  });
+
+  var ChannelMessagesView = Backbone.View.extend({
+    tagName: "div",
+    className: "messages",
+    template: _.template($('#channel-messages-template').html()),
+    render: function(){
+      this.$el.html(this.template(this.model.toJSON()));
+      return this;
+    },
   });
 
   // Messages
@@ -191,7 +204,10 @@ $(function(){
     // Add a single todo item to the list by creating a view for it, and
     // appending its element to the `<ul>`.
     addOne: function(channel) {
-      var view = new ChannelView({model: channel});
+      var mview = new ChannelMessagesView({model: channel, id: "messages-" + channel.get("name")});
+      mview.$el.hide();
+      this.$("#messages").append(mview.render().el);
+      var view = new ChannelView({model: channel, mview: mview});
       this.$("#channel_list").append(view.render().el);
     },
 
