@@ -76,8 +76,10 @@ $(function(){
         this.model.messages.fetch();
     },
     addOne: function(message) {
+      console.log("Added..");
+      console.log(message);
       var view = new MessageView({model: message});
-      this.$("#messages").append(view.render().el);
+      $("#messages").append(view.render().el);
     },
     addAll: function(messages) {
       messages.each(this.addOne);
@@ -93,7 +95,6 @@ $(function(){
 
     // Re-render the titles of the todo item.
     render: function() {
-      console.log(this.model.toJSON());
       this.$el.html(this.template(this.model.toJSON()));
       return this;
     },
@@ -209,9 +210,12 @@ $(function(){
         console.log(evt.data);
         var data = JSON.parse(evt.data);
         if(data.channels){
-            Channels.reset(data.channels);
-            //Channels.create({name: "test"});
+            //Channels.reset(data.channels);
         }
+        if(data.channel){
+            var c = Channels.get(data.channel);
+            c.messages.add(data);
+        }        
     };
 
 });
