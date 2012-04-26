@@ -70,6 +70,7 @@ $(function(){
     },
 
     show_messages: function(){
+        $("#messages").html("");
         console.log("Loading messages for " + this.model.get("name"));
         this.model.messages.bind('add', this.addOne, this);
         this.model.messages.bind('reset', this.addAll, this);
@@ -209,11 +210,14 @@ $(function(){
     ws.onmessage = function (evt) {
         console.log(evt.data);
         var data = JSON.parse(evt.data);
-        if(data.channels){
-            //Channels.reset(data.channels);
-        }
         if(data.channel){
-            var c = Channels.get(data.channel);
+            var name = data.channel;
+            var c = Channels.get(name);
+            if(!c){
+                Channels.add({name:name});
+                c = Channels.get(name);
+            }
+            c.messages.fetch()
             c.messages.add(data);
         }        
     };

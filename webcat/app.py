@@ -33,8 +33,6 @@ class PostHandler(tornado.web.RequestHandler):
         self.write('"ok"')
         for s in SOCKETS:
             s.write_message(m)
-            s.write_message({"channels": STORE.get_channels()})
-
 
 class Live(tornado.websocket.WebSocketHandler):
     def open(self):
