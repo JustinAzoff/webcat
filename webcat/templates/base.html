@@ -21,7 +21,7 @@
 <script src="{{static_url("js/backbone-min.js") }}"></script>
 <script src="{{static_url("js/app.js") }}"></script>
   <script type="text/template" id="channel-template">
-        <%= name %> <span class="badge badge-info"><%= unread %></span>
+        <a href="#"><%= name %> <span class="badge badge-info"><%= unread %></span></a>
   </script>
   <script type="text/template" id="message-template">
         <%= time %> - <%= msg %>

@@ -12,7 +12,7 @@ $(function(){
     defaults: function() {
       return {
         name: "unnamed?",
-        unread: "0"
+        unread: 0
       };
     },
 
@@ -70,15 +70,13 @@ $(function(){
     },
 
     show_messages: function(){
-        $("#messages").html("");
         console.log("Loading messages for " + this.model.get("name"));
-        this.model.messages.bind('add', this.addOne, this);
-        this.model.messages.bind('reset', this.addAll, this);
-        this.model.messages.fetch();
+        $("#messages").html("");
+        this.addAll(this.model.messages);
     },
     addOne: function(message) {
-      console.log("Added..");
-      console.log(message);
+      //console.log("Added..");
+      //console.log(message);
       var view = new MessageView({model: message});
       $("#messages").append(view.render().el);
     },
@@ -92,6 +90,9 @@ $(function(){
     initialize: function() {
       this.model.bind('change', this.render, this);
       this.model.bind('destroy', this.remove, this);
+      this.model.messages.bind('add', this.addOne, this);
+      this.model.messages.bind('reset', this.addAll, this);
+      this.model.messages.fetch();
     },
 
     // Re-render the titles of the todo item.
@@ -137,7 +138,7 @@ $(function(){
 
     // Re-render the titles of the todo item.
     render: function() {
-      console.log("rendering..");
+      //console.log("rendering..");
       this.$el.html(this.template(this.model.toJSON()));
       return this;
     },
@@ -203,7 +204,7 @@ $(function(){
   // Finally, we kick things off by creating the **App**.
   var App = new AppView;
 
-    var ws = new WebSocket("ws://localhost:8888/websocket");
+    var ws = new WebSocket("ws://localhost:8889/websocket");
     ws.onopen = function() {
         ws.send("Hello, world");
     };
@@ -216,9 +217,12 @@ $(function(){
             if(!c){
                 Channels.add({name:name});
                 c = Channels.get(name);
+                c.messages.fetch()
             }
-            c.messages.fetch()
+            console.log("adding ", data, " to ", c);
             c.messages.add(data);
+            c.set("unread", c.get("unread") + 1);
+            console.log(c);
         }        
     };
 
