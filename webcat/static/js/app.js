@@ -73,6 +73,7 @@ $(function(){
         console.log("Loading messages for " + this.model.get("name"));
         $("#messages").html("");
         this.addAll(this.model.messages);
+        this.model.set("unread", 0);
     },
     addOne: function(message) {
       //console.log("Added..");
