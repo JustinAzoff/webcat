@@ -83,6 +83,8 @@ $(function(){
       var view = new MessageView({model: message});
       this.options.mview.$el.append(view.render().el);
       //$("#messages-" + this.model.get("name")).append(view.render().el);
+      var height = this.options.mview.el.scrollHeight;
+      this.options.mview.$el.scrollTop(height);
     },
     addAll: function(messages) {
       messages.each(this.addOne, this);
@@ -221,12 +223,12 @@ $(function(){
   // Finally, we kick things off by creating the **App**.
   var App = new AppView;
 
-    var ws = new WebSocket("ws://localhost:8889/websocket");
+    var ws = new WebSocket("ws://" + document.location.hostname + ":8889/websocket");
     ws.onopen = function() {
         ws.send("Hello, world");
     };
     ws.onmessage = function (evt) {
-        console.log(evt.data);
+        //console.log(evt.data);
         var data = JSON.parse(evt.data);
         if(data.channel){
             var name = data.channel;
@@ -235,11 +237,12 @@ $(function(){
                 Channels.add({name:name});
                 c = Channels.get(name);
                 c.messages.fetch()
+            } else {
+                //console.log("adding ", data, " to ", c);
+                c.messages.add(data);
             }
-            console.log("adding ", data, " to ", c);
-            c.messages.add(data);
             c.set("unread", c.get("unread") + 1);
-            console.log(c);
+            //console.log(c);
         }        
     };
 
