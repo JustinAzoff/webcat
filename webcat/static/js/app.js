@@ -76,6 +76,7 @@ $(function(){
         this.model.set("unread", 0);
         $(".messages").hide()
         this.options.mview.$el.show();
+        document.title=this.model.get("name") + " - messages";
     },
     addOne: function(message, that) {
       //console.log("Added..");
