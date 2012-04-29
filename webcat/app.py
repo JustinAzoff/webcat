@@ -65,7 +65,8 @@ def make_app():
 
 def serv():
     application = make_app()
-    application.listen(8889)
+    port = int(os.environ.get('PORT', 8889))
+    application.listen(port)
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":

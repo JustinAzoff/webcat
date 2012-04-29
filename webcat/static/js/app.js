@@ -240,7 +240,7 @@ $(function(){
     }, 1000);
 
 
-    var ws = new WebSocket("ws://" + document.location.hostname + ":8889/websocket");
+    var ws = new WebSocket("ws://" + document.location.hostname + ":" + document.location.port + "/websocket");
     ws.onopen = function() {
         //
     };
