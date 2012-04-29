@@ -240,7 +240,9 @@ $(function(){
     }, 1000);
 
 
-    var socket = io.connect('http://' + document.location.hostname + ":" + document.location.port);
+    // remove websocket for heroku
+    var options = {transports:["flashsocket", "htmlfile", "xhr-polling", "jsonp-polling"]};
+    var socket = io.connect('http://' + document.location.hostname + ":" + document.location.port, options);
     socket.on("connect", function() {
         //
     });
