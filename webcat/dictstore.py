@@ -22,5 +22,4 @@ class DictStore:
         return self.channels[channel]
 
     def get_channels(self):
-        chans = self.channels.keys()
-        return [{ "name": chan, "unread": 0} for chan in chans]
+        return [{ "name": name, "unread": len(items)} for (name, items) in self.channels.items()]
