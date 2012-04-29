@@ -70,36 +70,15 @@ $(function(){
     },
 
     show_messages: function(){
-        console.log("Loading messages for " + this.model.get("name"));
-        $("#messages-" + this.model.get("name")).html("");
-        this.addAll(this.model.messages);
-        this.model.set("unread", 0);
-        $(".messages").hide()
-        this.options.mview.$el.show();
-        document.title=this.model.get("name") + " - messages";
+        var name = this.model.get("name");
+        app_router.navigate("channels/" + name);
     },
-    addOne: function(message, that) {
-      //console.log("Added..");
-      //console.log(message);
-      var view = new MessageView({model: message});
-      this.options.mview.$el.append(view.render().el);
-      //$("#messages-" + this.model.get("name")).append(view.render().el);
-      var height = this.options.mview.el.scrollHeight;
-      this.options.mview.$el.scrollTop(height);
-    },
-    addAll: function(messages) {
-      messages.each(this.addOne, this);
-    },
-
     // The ChannelView listens for changes to its model, re-rendering. Since there's
     // a one-to-one correspondence between a **Channel** and a **ChannelView** in this
     // app, we set a direct reference on the model for convenience.
     initialize: function() {
       this.model.bind('change', this.render, this);
       this.model.bind('destroy', this.remove, this);
-      this.model.messages.bind('add', this.addOne, this);
-      this.model.messages.bind('reset', this.addAll, this);
-      this.model.messages.fetch();
     },
 
     // Re-render the titles of the todo item.
@@ -116,13 +95,31 @@ $(function(){
   });
 
   var ChannelMessagesView = Backbone.View.extend({
-    tagName: "div",
+    tagName: "ul",
     className: "messages",
     template: _.template($('#channel-messages-template').html()),
     render: function(){
       this.$el.html(this.template(this.model.toJSON()));
       return this;
     },
+    initialize: function() {
+      this.model.bind('add', this.addOne, this);
+      this.model.bind('reset', this.addAll, this);
+      this.model.fetch();
+      $("#messages").append(this.el);
+    },
+    addOne: function(message, that) {
+      console.log("Rendering message " + message.get('msg'));
+      var view = new MessageView({model: message});
+      this.$el.append(view.render().el);
+      //$("#messages-" + this.model.get("name")).append(view.render().el);
+      var height = this.el.scrollHeight;
+      this.$el.scrollTop(height);
+    },
+    addAll: function(messages) {
+      messages.each(this.addOne, this);
+    },
+
   });
 
   // Messages
@@ -207,10 +204,7 @@ $(function(){
     // Add a single todo item to the list by creating a view for it, and
     // appending its element to the `<ul>`.
     addOne: function(channel) {
-      var mview = new ChannelMessagesView({model: channel, id: "messages-" + channel.get("name")});
-      mview.$el.hide();
-      this.$("#messages").append(mview.render().el);
-      var view = new ChannelView({model: channel, mview: mview});
+      var view = new ChannelView({model: channel});
       this.$("#channel_list").append(view.render().el);
     },
 
@@ -247,4 +241,39 @@ $(function(){
         }        
     };
 
+    var Workspace = Backbone.Router.extend({
+        routes: {
+            "channels/:channel":   "channel",    // #channels/foo
+        },
+
+        initialize: function() {
+            this.views = {};
+        },
+        channel: function(name) {
+            console.log("Route for " + name);
+            chan = Channels.get(name);
+            mview = this.views[name];
+            if(!this.views[name]){
+                var mview = new ChannelMessagesView({model: chan.messages, id: "messages-" + name});
+                this.views[name]=mview;
+            }
+            chan.set("unread", 0);
+            _.each(this.views, function(v) {
+                if(v != mview){
+                    v.$el.hide();
+                }
+            });
+            $(".messages").hide()
+            mview.$el.show();
+            document.title=name + " - messages";
+        },
+
+    });
+    var app_router = new Workspace;
+    //FIXME - The above Workspace.channel is being called before channels are done loading.
+    //        One way to fix this is to include the json channel list in the html page and call Channels.reset
+    //        from there.  Need to return per-channel templates though, which makes sense anyway
+    window.setTimeout(function () {
+        Backbone.history.start({pushState: true});
+    }, 1000);
 });

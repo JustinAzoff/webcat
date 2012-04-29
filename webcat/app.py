@@ -55,6 +55,7 @@ def make_app():
     application = tornado.web.Application([
         (r"/static/(.*)", tornado.web.StaticFileHandler),
         (r"/", MainHandler),
+        (r"/channels/.*", MainHandler),
         (r"/post", PostHandler),
         (r"/channel/(.*)/messages", ChannelMessagesHandler),
         (r"/channels", ChannelsHandler),
