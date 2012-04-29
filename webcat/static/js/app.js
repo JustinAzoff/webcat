@@ -218,29 +218,6 @@ $(function(){
   // Finally, we kick things off by creating the **App**.
   var App = new AppView;
 
-    var ws = new WebSocket("ws://" + document.location.hostname + ":8889/websocket");
-    ws.onopen = function() {
-        ws.send("Hello, world");
-    };
-    ws.onmessage = function (evt) {
-        //console.log(evt.data);
-        var data = JSON.parse(evt.data);
-        if(data.channel){
-            var name = data.channel;
-            var c = Channels.get(name);
-            if(!c){
-                Channels.add({name:name});
-                c = Channels.get(name);
-                c.messages.fetch()
-            } else {
-                //console.log("adding ", data, " to ", c);
-                c.messages.add(data);
-            }
-            c.set("unread", c.get("unread") + 1);
-            //console.log(c);
-        }        
-    };
-
     var Workspace = Backbone.Router.extend({
         routes: {
             "channels/:channel":   "channel",    // #channels/foo
@@ -276,4 +253,28 @@ $(function(){
     window.setTimeout(function () {
         Backbone.history.start({pushState: true});
     }, 1000);
+
+
+    var ws = new WebSocket("ws://" + document.location.hostname + ":8889/websocket");
+    ws.onopen = function() {
+        ws.send("Hello, world");
+    };
+    ws.onmessage = function (evt) {
+        //console.log(evt.data);
+        var data = JSON.parse(evt.data);
+        if(data.channel){
+            var name = data.channel;
+            var c = Channels.get(name);
+            if(!c){
+                Channels.add({name:name});
+                c = Channels.get(name);
+                c.messages.fetch()
+            } else {
+                //console.log("adding ", data, " to ", c);
+                c.messages.add(data);
+            }
+            c.set("unread", c.get("unread") + 1);
+            //console.log(c);
+        }        
+    };
 });
