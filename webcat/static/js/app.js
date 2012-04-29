@@ -240,26 +240,22 @@ $(function(){
     }, 1000);
 
 
-    var ws = new WebSocket("ws://" + document.location.hostname + ":" + document.location.port + "/websocket");
-    ws.onopen = function() {
+    var socket = io.connect('http://' + document.location.hostname + ":" + document.location.port);
+    socket.on("connect", function() {
         //
-    };
-    ws.onmessage = function (evt) {
-        //console.log(evt.data);
-        var data = JSON.parse(evt.data);
-        if(data.channel){
-            var name = data.channel;
-            var c = Channels.get(name);
-            if(!c){
-                Channels.add({name:name});
-                c = Channels.get(name);
-                c.messages.fetch()
-            } else {
-                //console.log("adding ", data, " to ", c);
-                c.messages.add(data);
-            }
-            c.set("unread", c.get("unread") + 1);
-            //console.log(c);
-        }        
-    };
+    });
+    socket.on("message", function(data) {
+        var name = data.channel;
+        var c = Channels.get(name);
+        if(!c){
+            Channels.add({name:name});
+            c = Channels.get(name);
+            c.messages.fetch()
+        } else {
+            //console.log("adding ", data, " to ", c);
+            c.messages.add(data);
+        }
+        c.set("unread", c.get("unread") + 1);
+        //console.log(c);
+    });
 });

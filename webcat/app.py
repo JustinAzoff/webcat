@@ -4,6 +4,8 @@ import tornado.web
 import tornado.websocket
 from tornado.escape import json_decode, json_encode
 
+from tornadio2 import SocketConnection, TornadioRouter, SocketServer
+
 from webcat.dictstore import DictStore
 
 STORE = DictStore()
@@ -32,27 +34,31 @@ class PostHandler(tornado.web.RequestHandler):
             m = STORE.add_msg(t, msg)
         self.write('"ok"')
         for s in SOCKETS:
-            s.write_message(m)
+            s.emit("message", m)
 
-class Live(tornado.websocket.WebSocketHandler):
-    def open(self):
+class Live(SocketConnection):
+    def on_open(self, request):
         print "WebSocket open"
-        self.write_message({"channels": STORE.get_channels()})
+        self.emit("channels", {"channels": STORE.get_channels()})
         SOCKETS.add(self)
 
     def on_message(self, message):
-        self.write_message({"msg": "You said: " + message})
+        self.send({"msg": "You said: " + message})
 
     def on_close(self):
         print "WebSocket closed"
         SOCKETS.remove(self)
 
-def make_app():
+LiveRouter = TornadioRouter(Live)
+
+
+def make_app(port=8889):
     settings = dict(
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
         static_path=os.path.join(os.path.dirname(__file__), "static"),
+        socket_io_port=port
     )
-    application = tornado.web.Application([
+    application = tornado.web.Application(LiveRouter.apply_routes([
         (r"/static/(.*)", tornado.web.StaticFileHandler),
         (r"/", MainHandler),
         (r"/channels/.*", MainHandler),
@@ -60,14 +66,15 @@ def make_app():
         (r"/channel/(.*)/messages", ChannelMessagesHandler),
         (r"/channels", ChannelsHandler),
         (r"/websocket", Live),
-    ], **settings)
+    ]), **settings)
     return application
 
 def serv():
-    application = make_app()
     port = int(os.environ.get('PORT', 8889))
-    application.listen(port)
-    tornado.ioloop.IOLoop.instance().start()
+    application = make_app(port)
+    #application.listen(port)
+    SocketServer(application)
+    #tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
     serv()

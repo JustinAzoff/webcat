@@ -7,6 +7,7 @@ setup(name="webcat",
     install_requires=[
     # -*- Extra requirements: -*-
         "tornado",
+        "tornadio2",
     ],
     entry_points = {
         'console_scripts': [
