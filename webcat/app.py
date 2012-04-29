@@ -52,7 +52,7 @@ class Live(SocketConnection):
 LiveRouter = TornadioRouter(Live)
 
 
-def make_app(port=8889):
+def make_app(port=5000):
     settings = dict(
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
         static_path=os.path.join(os.path.dirname(__file__), "static"),
@@ -70,7 +70,7 @@ def make_app(port=8889):
     return application
 
 def serv():
-    port = int(os.environ.get('PORT', 8889))
+    port = int(os.environ.get('PORT', 5000))
     application = make_app(port)
     #application.listen(port)
     SocketServer(application,xheaders=True)
