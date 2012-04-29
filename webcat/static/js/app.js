@@ -240,7 +240,7 @@ $(function(){
 
     var ws = new WebSocket("ws://" + document.location.hostname + ":8889/websocket");
     ws.onopen = function() {
-        ws.send("Hello, world");
+        //
     };
     ws.onmessage = function (evt) {
         //console.log(evt.data);
