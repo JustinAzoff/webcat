@@ -70,6 +70,8 @@ $(function(){
 
     show_messages: function(){
         var name = this.model.get("name");
+        chan = Channels.get(name);
+        chan.set("unread", 0);
         app_router.navigate("channels/" + name);
     },
     // The ChannelView listens for changes to its model, re-rendering. Since there's
