@@ -73,7 +73,7 @@ def serv():
     port = int(os.environ.get('PORT', 8889))
     application = make_app(port)
     #application.listen(port)
-    SocketServer(application)
+    SocketServer(application,xheaders=True)
     #tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
