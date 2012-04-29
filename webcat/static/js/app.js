@@ -8,7 +8,6 @@ $(function(){
   var Channel = Backbone.Model.extend({
     urlRoot: '/channel',
 
-    // Default attributes for the todo item.
     defaults: function() {
       return {
         name: "unnamed?",
@@ -81,7 +80,6 @@ $(function(){
       this.model.bind('destroy', this.remove, this);
     },
 
-    // Re-render the titles of the todo item.
     render: function() {
       this.$el.html(this.template(this.model.toJSON()));
       return this;
@@ -150,7 +148,6 @@ $(function(){
       this.model.bind('destroy', this.remove, this);
     },
 
-    // Re-render the titles of the todo item.
     render: function() {
       //console.log("rendering..");
       this.$el.html(this.template(this.model.toJSON()));
@@ -175,13 +172,6 @@ $(function(){
 
     // Our template for the line of statistics at the bottom of the app.
 
-    // Delegated events for creating new items, and clearing completed ones.
-    //events: {
-    //  "keypress #new-todo":  "createOnEnter",
-    //  "click #clear-completed": "clearCompleted",
-    //  "click #toggle-all": "toggleAllComplete"
-    //},
-
     // At initialization we bind to the relevant events on the `Channels`
     // collection, when items are added or changed. Kick things off by
     // loading any preexisting todos that might be saved in *jquery*.
@@ -189,16 +179,9 @@ $(function(){
         Channels.bind('add', this.addOne, this);
         Channels.bind('reset', this.addAll, this);
         Channels.fetch();
-
-        //Messages.add([{"msg": "hi", "time": "now!"}]);
     },
 
-    // Re-rendering the App just means refreshing the statistics -- the rest
-    // of the app doesn't change.
     render: function() {
-      //  this.main.show();
-      //  this.footer.show();
-      //  this.footer.html(this.statsTemplate({done: done, remaining: remaining}));
     },
 
     // Add a single todo item to the list by creating a view for it, and
