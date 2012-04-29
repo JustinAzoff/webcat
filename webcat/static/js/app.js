@@ -240,10 +240,6 @@ $(function(){
     }, 1000);
 
 
-    io.configure(function () { 
-        io.set("transports", ["xhr-polling"]); 
-        io.set("polling duration", 10); 
-    });
     var socket = io.connect('http://' + document.location.hostname + ":" + document.location.port);
     socket.on("connect", function() {
         //
