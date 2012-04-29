@@ -63,7 +63,10 @@ def make_app():
     ], **settings)
     return application
 
-if __name__ == "__main__":
+def serv():
     application = make_app()
     application.listen(8889)
     tornado.ioloop.IOLoop.instance().start()
+
+if __name__ == "__main__":
+    serv()
